@@ -1,0 +1,857 @@
+:root {
+  --bg-deep: #070a12;
+  --bg-navy: #0e172e;
+  --card-top: rgba(18, 29, 58, 0.92);
+  --card-bottom: rgba(9, 14, 28, 0.96);
+  --gold: #f4c465;
+  --gold-bright: #ffe3a3;
+  --gold-dim: rgba(244, 196, 101, 0.25);
+  --cyan: #4da6ff;
+  --text-main: #f8f6f0;
+  --text-muted: #9aa7c2;
+  --border-subtle: rgba(244, 196, 101, 0.28);
+  --emerald: #34d399;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Ambient Background */
+.bg-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 0%, #132145 0%, var(--bg-deep) 68%);
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.45;
+}
+
+.glow-gold {
+  width: 420px;
+  height: 420px;
+  top: -120px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(244, 196, 101, 0.35), transparent 70%);
+}
+
+.glow-navy {
+  width: 520px;
+  height: 520px;
+  bottom: -160px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(77, 166, 255, 0.22), transparent 70%);
+}
+
+.cursor-glow {
+  position: fixed;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: screen;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(244, 196, 101, 0.2) 0%,
+    rgba(77, 166, 255, 0.08) 42%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#bokehCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#fireworksCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Stage */
+.stage {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 16px 40px;
+}
+
+.pass-wrapper {
+  width: 100%;
+  max-width: 920px;
+  perspective: 1400px;
+}
+
+/* Boarding Pass Card */
+.boarding-pass {
+  position: relative;
+  background: linear-gradient(155deg, var(--card-top), var(--card-bottom));
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 48px rgba(244, 196, 101, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  overflow: hidden;
+  animation: passEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes passEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Top Strip */
+.pass-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 28px;
+  background: linear-gradient(90deg, rgba(244, 196, 101, 0.14), rgba(22, 42, 90, 0.55));
+  border-bottom: 1px solid rgba(244, 196, 101, 0.22);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gold), #d99b38);
+  color: #090d16;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 14px rgba(244, 196, 101, 0.3);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+
+.brand-sub {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sound-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 196, 101, 0.45);
+  background: rgba(244, 196, 101, 0.12);
+  color: var(--gold-bright);
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sound-btn:hover,
+.sound-btn:active {
+  background: rgba(244, 196, 101, 0.24);
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(244, 196, 101, 0.25);
+}
+
+.sound-btn:active {
+  transform: scale(0.95);
+}
+
+.eq-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 13px;
+}
+
+.eq-bars .bar {
+  width: 2.5px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: eqPulse 0.9s ease-in-out infinite alternate;
+}
+
+.eq-bars .bar:nth-child(1) {
+  height: 6px;
+  animation-delay: 0s;
+}
+
+.eq-bars .bar:nth-child(2) {
+  height: 12px;
+  animation-delay: 0.25s;
+}
+
+.eq-bars .bar:nth-child(3) {
+  height: 8px;
+  animation-delay: 0.5s;
+}
+
+@keyframes eqPulse {
+  from {
+    transform: scaleY(0.35);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.sound-btn.muted {
+  color: var(--text-muted);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(7, 10, 18, 0.55);
+  box-shadow: none;
+}
+
+.sound-btn.muted .eq-bars .bar {
+  animation: none;
+  height: 3px;
+  opacity: 0.5;
+}
+
+.header-meta {
+  text-align: right;
+}
+
+.meta-label {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+}
+
+.meta-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+}
+
+/* Main Body */
+.pass-body {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 28px;
+  padding: 28px;
+}
+
+/* Portrait Column */
+.portrait-col {
+  display: flex;
+}
+
+.portrait-frame {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(244, 196, 101, 0.35);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+  background: #0b101f;
+}
+
+.portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.portrait-frame:hover .portrait-img {
+  transform: scale(1.03);
+}
+
+.portrait-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(7, 10, 18, 0.92) 0%,
+    rgba(7, 10, 18, 0.2) 45%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.portrait-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(7, 10, 18, 0.72);
+  border: 1px solid rgba(244, 196, 101, 0.4);
+  backdrop-filter: blur(8px);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-bright);
+}
+
+.tag-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+.portrait-caption {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.caption-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+
+.caption-name {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+/* Info Column */
+.info-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Route Banner */
+.route-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.airport {
+  display: flex;
+  flex-direction: column;
+}
+
+.airport-right {
+  text-align: right;
+}
+
+.airport-code {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  background: linear-gradient(135deg, #ffffff 30%, var(--gold-bright) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.airport-city {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.flight-path {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gold);
+}
+
+.path-line {
+  flex: 1;
+  height: 1px;
+  border-top: 2px dashed rgba(244, 196, 101, 0.45);
+}
+
+.plane-icon {
+  display: inline-flex;
+  transform: rotate(90deg);
+  color: var(--gold);
+  filter: drop-shadow(0 0 8px rgba(244, 196, 101, 0.55));
+}
+
+/* Passenger Box */
+.passenger-box {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(244, 196, 101, 0.1), rgba(22, 42, 90, 0.35));
+  border: 1px solid rgba(244, 196, 101, 0.28);
+}
+
+.passenger-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.field-label {
+  display: block;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.guest-id-pill {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(7, 10, 18, 0.75);
+  border: 1px solid rgba(244, 196, 101, 0.4);
+  color: var(--gold);
+}
+
+.passenger-name {
+  margin-top: 6px;
+  font-family: "Space Grotesk", "Be Vietnam Pro", sans-serif;
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1.25;
+}
+
+.invite-note {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #d6deee;
+}
+
+/* Details Grid */
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.detail-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.detail-wide {
+  grid-column: 1 / -1;
+}
+
+.field-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.highlight-gold {
+  color: var(--gold-bright);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.15rem;
+}
+
+.field-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* Contact Row */
+.contact-item {
+  border-color: rgba(244, 196, 101, 0.22);
+  background: rgba(244, 196, 101, 0.05);
+}
+
+.contact-row {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.contact-msg {
+  font-size: 0.9rem;
+  color: #e4eaf6;
+}
+
+.phone-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(244, 196, 101, 0.14);
+  border: 1px solid rgba(244, 196, 101, 0.45);
+  color: var(--gold-bright);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.phone-link:hover,
+.phone-link:active {
+  background: rgba(244, 196, 101, 0.26);
+  box-shadow: 0 0 14px rgba(244, 196, 101, 0.28);
+}
+
+.phone-link:active {
+  transform: scale(0.96);
+}
+
+/* Perforation Divider */
+.perforation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 28px;
+}
+
+.dashed-line {
+  width: 100%;
+  border-top: 2px dashed rgba(244, 196, 101, 0.3);
+  margin: 0 18px;
+}
+
+.notch {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 1px solid var(--border-subtle);
+  z-index: 2;
+}
+
+.notch-left {
+  left: -14px;
+}
+
+.notch-right {
+  right: -14px;
+}
+
+/* Stub Footer */
+.pass-stub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 18px 28px 24px;
+  background: rgba(6, 9, 18, 0.45);
+}
+
+.stub-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stub-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.mono-val {
+  display: block;
+  margin-top: 2px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.status-confirmed {
+  color: var(--gold);
+}
+
+.status-checked {
+  color: var(--emerald);
+}
+
+/* Guest Note Input */
+.guest-note-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.guest-note-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(244, 196, 101, 0.22);
+  color: var(--text-main);
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.guest-note-input::placeholder {
+  color: var(--text-muted);
+}
+
+.guest-note-input:focus {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.sync-hint {
+  min-height: 16px;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.sync-hint.ok {
+  color: var(--emerald);
+}
+
+.sync-hint.err {
+  color: #f87171;
+}
+
+/* Buttons */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gold), #d99b38);
+  color: #090d16;
+  box-shadow: 0 6px 20px rgba(244, 196, 101, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(244, 196, 101, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(244, 196, 101, 0.12);
+  border-color: rgba(244, 196, 101, 0.4);
+  color: var(--gold-bright);
+}
+
+.btn-secondary:hover {
+  background: rgba(244, 196, 101, 0.22);
+}
+
+.btn-secondary.checked {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: var(--emerald);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--text-main);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Barcode */
+.stub-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.barcode {
+  width: 168px;
+  height: 48px;
+  color: var(--text-main);
+}
+
+.barcode-text {
+  margin-top: 6px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+}
+
+/* Responsive Mobile */
+@media (max-width: 780px) {
+  .pass-header {
+    padding: 14px 16px;
+  }
+
+  .brand-title {
+    font-size: 0.82rem;
+  }
+
+  .sound-btn {
+    padding: 0 10px;
+    font-size: 0.72rem;
+  }
+
+  .pass-body {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 18px;
+  }
+
+  .portrait-frame {
+    min-height: 300px;
+    max-height: 380px;
+  }
+
+  .airport-code {
+    font-size: 1.45rem;
+  }
+
+  .pass-stub {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 18px 22px;
+  }
+
+  .action-buttons .btn {
+    flex: 1 1 auto;
+  }
+
+  .stub-right {
+    width: 100%;
+  }
+}

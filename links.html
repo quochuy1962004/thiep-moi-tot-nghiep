@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Danh sách Link Thiệp Mời — Võ Quốc Huy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: #070a12;
+      color: #f8f6f0;
+      font-family: "Be Vietnam Pro", sans-serif;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      color: #ffe3a3;
+      margin-bottom: 8px;
+    }
+    p.sub {
+      color: #9aa7c2;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    .table-wrap {
+      background: rgba(16, 26, 52, 0.85);
+      border: 1px solid rgba(244, 196, 101, 0.28);
+      border-radius: 16px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 0.9rem;
+    }
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9aa7c2;
+      background: rgba(244, 196, 101, 0.08);
+    }
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+      color: #f4c465;
+    }
+    .badge-ok {
+      color: #34d399;
+      font-weight: 600;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid rgba(244, 196, 101, 0.4);
+      background: rgba(244, 196, 101, 0.14);
+      color: #ffe3a3;
+    }
+    .btn:hover { background: rgba(244, 196, 101, 0.25); }
+    .btn-open {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: #f8f6f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Danh sách Link Thiệp Mời Cá Nhân Hóa</h1>
+    <p class="sub" id="sourceLabel">Đang tải dữ liệu...</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>SST</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Comment</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="guestRows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="guests.js"></script>
+  <script>
+    const tbody = document.getElementById("guestRows");
+    const sourceLabel = document.getElementById("sourceLabel");
+    const baseUrl = window.location.href.replace(/links\.html.*$/, "index.html");
+    const sheetApiUrl = (window.SHEET_API_URL || "").trim();
+
+    function renderRows(guests, labelText) {
+      sourceLabel.textContent = labelText;
+      tbody.innerHTML = "";
+      Object.entries(guests).forEach(([code, info]) => {
+        const inviteCode = info.code || code;
+        const inviteUrl = `${baseUrl}?code=${encodeURIComponent(inviteCode)}`;
+        const isConfirmed = (info.status || "").toUpperCase() === "CONFIRMED";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="mono">${info.sst || "—"}</td>
+          <td class="mono">#${inviteCode}</td>
+          <td><strong>${info.name || "—"}</strong></td>
+          <td class="${isConfirmed ? "badge-ok" : ""}">${info.status || "INVITED"}</td>
+          <td>${info.comment || "—"}</td>
+          <td>
+            <div class="actions">
+              <a class="btn btn-open" href="index.html?code=${encodeURIComponent(inviteCode)}" target="_blank">Mở thiệp</a>
+              <button class="btn copy-btn" type="button">Copy Link</button>
+            </div>
+          </td>
+        `;
+        const copyBtn = tr.querySelector(".copy-btn");
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(inviteUrl);
+            copyBtn.textContent = "Đã Copy!";
+            setTimeout(() => { copyBtn.textContent = "Copy Link"; }, 1500);
+          } catch {
+            prompt("Copy link thiệp mời:", inviteUrl);
+          }
+        });
+        tbody.appendChild(tr);
+      });
+    }
+
+    if (sheetApiUrl) {
+      fetch(sheetApiUrl)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.ok && data.guests) {
+            renderRows(data.guests, "Nguồn dữ liệu: Google Sheet (Trực tiếp)");
+          } else {
+            renderRows(window.GUEST_LIST || {}, "Nguồn dữ liệu: guests.js (Dự phòng)");
+          }
+        })
+        .catch(() => {
+          renderRows(window.GUEST_LIST || {}, "Nguồn dữ liệu: guests.js (Không kết nối được Google Sheet)");
+        });
+    } else {
+      renderRows(window.GUEST_LIST || {}, "Nguồn dữ liệu: guests.js (Chưa gắn SHEET_API_URL)");
+    }
+  </script>
+</body>
+</html>
