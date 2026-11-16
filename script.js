@@ -151,11 +151,15 @@
 
     sendNoteBtn.disabled = false;
     sendNoteBtn.classList.add("sent");
+    guestNoteInput.classList.add("sent");
     if (sendNoteBtnText) sendNoteBtnText.textContent = "Đã gửi ✓";
+    spawnNoteBurst(sendNoteBtn);
+
     setTimeout(() => {
       sendNoteBtn.classList.remove("sent");
+      guestNoteInput.classList.remove("sent");
       if (sendNoteBtnText) sendNoteBtnText.textContent = "Gửi lời nhắn";
-    }, 2000);
+    }, 2400);
   }
 
   if (sendNoteBtn) {
@@ -544,6 +548,35 @@
     [450, 560, 680, 800, 920].forEach((d) => launchSingleRocket(d, true));
     // Wave 3: Grand finale
     [1150, 1210, 1270, 1340, 1420].forEach((d) => launchSingleRocket(d, true));
+  }
+
+  function spawnNoteBurst(btnEl) {
+    if (!btnEl) return;
+    const rect = btnEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ["#34d399", "#a7f3d0", "#ffe3a3", "#ffffff"];
+
+    for (let i = 0; i < 24; i++) {
+      const angle = (Math.PI * 2 * i) / 24 + (Math.random() - 0.5) * 0.25;
+      const speed = Math.random() * 4.2 + 1.6;
+      sparks.push({
+        x: cx,
+        y: cy,
+        px: cx,
+        py: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 1.2,
+        r: Math.random() * 2.2 + 1.2,
+        alpha: 1,
+        decay: Math.random() * 0.02 + 0.02,
+        color: colors[i % colors.length],
+        crackle: false
+      });
+    }
+    if (!fwAnimId) {
+      fwLoop();
+    }
   }
 
   function fwLoop() {

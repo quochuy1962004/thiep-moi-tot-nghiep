@@ -703,6 +703,8 @@ body {
 }
 
 .btn-note {
+  position: relative;
+  overflow: visible;
   background: rgba(77, 166, 255, 0.14);
   border-color: rgba(77, 166, 255, 0.42);
   color: #cfe6ff;
@@ -716,9 +718,50 @@ body {
 }
 
 .btn-note.sent {
-  background: rgba(52, 211, 153, 0.16);
-  border-color: rgba(52, 211, 153, 0.5);
-  color: var(--emerald);
+  background: rgba(52, 211, 153, 0.22);
+  border-color: var(--emerald);
+  color: #a7f3d0;
+  box-shadow: 0 0 22px rgba(52, 211, 153, 0.45);
+  animation: noteSuccessPop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-note.sent::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 12px;
+  border: 2px solid var(--emerald);
+  opacity: 0;
+  pointer-events: none;
+  animation: noteRipple 0.7s ease-out forwards;
+}
+
+.guest-note-input.sent {
+  border-color: var(--emerald);
+  box-shadow: 0 0 14px rgba(52, 211, 153, 0.25);
+}
+
+@keyframes noteSuccessPop {
+  0% {
+    transform: scale(0.94);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes noteRipple {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
 }
 
 .guest-note-input::placeholder {
