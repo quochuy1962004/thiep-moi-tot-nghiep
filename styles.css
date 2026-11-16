@@ -682,12 +682,15 @@ body {
 /* Guest Note Input */
 .guest-note-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .guest-note-input {
-  width: 100%;
+  flex: 1 1 220px;
+  min-width: 0;
   padding: 9px 12px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
@@ -697,6 +700,25 @@ body {
   font-size: 0.84rem;
   outline: none;
   transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.btn-note {
+  background: rgba(77, 166, 255, 0.14);
+  border-color: rgba(77, 166, 255, 0.42);
+  color: #cfe6ff;
+  white-space: nowrap;
+}
+
+.btn-note:hover,
+.btn-note:active {
+  background: rgba(77, 166, 255, 0.25);
+  border-color: var(--cyan);
+}
+
+.btn-note.sent {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: var(--emerald);
 }
 
 .guest-note-input::placeholder {

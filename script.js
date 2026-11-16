@@ -17,10 +17,13 @@
   const checkinStatusEl = document.getElementById("checkinStatus");
   const calendarBtn = document.getElementById("calendarBtn");
   const guestNoteInput = document.getElementById("guestNoteInput");
+  const sendNoteBtn = document.getElementById("sendNoteBtn");
+  const sendNoteBtnText = document.getElementById("sendNoteBtnText");
   const soundToggleBtn = document.getElementById("soundToggleBtn");
   const soundLabelEl = document.getElementById("soundLabel");
 
   const storageKey = `vqh_checkin_${guestCode || "default"}`;
+  const noteStorageKey = `vqh_note_${guestCode || "default"}`;
 
   function formatSeat(sst) {
     if (!sst) return "VIP-00";
@@ -72,6 +75,10 @@
   if (localStorage.getItem(storageKey) === "1") {
     setCheckedIn(true);
   }
+  const savedLocalNote = localStorage.getItem(noteStorageKey);
+  if (savedLocalNote && guestNoteInput && !guestNoteInput.value) {
+    guestNoteInput.value = savedLocalNote;
+  }
 
   if (sheetApiUrl && guestCode) {
     if (!fallbackGuest) {
@@ -120,6 +127,48 @@
       }
     }
   });
+
+  // 2b. Dedicated Send Message Button (writes Comment to Google Sheet)
+  async function submitGuestNote() {
+    if (!guestNoteInput || !sendNoteBtn) return;
+    const comment = guestNoteInput.value.trim();
+    localStorage.setItem(noteStorageKey, comment);
+
+    sendNoteBtn.disabled = true;
+    if (sendNoteBtnText) sendNoteBtnText.textContent = "Đang gửi...";
+
+    if (sheetApiUrl && guestCode) {
+      try {
+        await fetch(sheetApiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ code: guestCode, comment })
+        });
+      } catch {
+        // Lưu tạm trên thiết bị nếu mất kết nối
+      }
+    }
+
+    sendNoteBtn.disabled = false;
+    sendNoteBtn.classList.add("sent");
+    if (sendNoteBtnText) sendNoteBtnText.textContent = "Đã gửi ✓";
+    setTimeout(() => {
+      sendNoteBtn.classList.remove("sent");
+      if (sendNoteBtnText) sendNoteBtnText.textContent = "Gửi lời nhắn";
+    }, 2000);
+  }
+
+  if (sendNoteBtn) {
+    sendNoteBtn.addEventListener("click", submitGuestNote);
+  }
+  if (guestNoteInput) {
+    guestNoteInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitGuestNote();
+      }
+    });
+  }
 
   // 3. Download .ics Calendar Event
   calendarBtn.addEventListener("click", () => {
